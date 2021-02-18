@@ -1,0 +1,12 @@
+version: '3.4'
+services:
+  database:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=balda
+      - POSTGRES_PASSWORD=balda
+      - POSTGRES_DB=balda
+    volumes:
+      - ./docker/database/data:/var/lib/postgresql/data
+    ports:
+      - 5555:5432
