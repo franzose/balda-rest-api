@@ -6,6 +6,7 @@ using Balda.WebApi.Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Balda.WebApi.Controllers
 {
@@ -14,10 +15,14 @@ namespace Balda.WebApi.Controllers
     public sealed class RegistrationController : ControllerBase
     {
         private readonly UserManager<BaldaUser> _userManager;
+        private readonly ILogger<RegistrationController> _logger;
 
-        public RegistrationController(UserManager<BaldaUser> userManager)
+        public RegistrationController(
+            UserManager<BaldaUser> userManager,
+            ILogger<RegistrationController> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
         
         [AllowAnonymous]
@@ -35,8 +40,9 @@ namespace Balda.WebApi.Controllers
             }
             catch (Exception e)
             {
-                // TODO: log error
-                return Problem(e.Message, "", 500, "Something went wrong");
+                _logger.LogError(e.Message, e);
+                
+                return Problem("Your request could not be processed", "", 500, "Something went wrong");
             }
         }
     }
