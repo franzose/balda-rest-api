@@ -1,5 +1,8 @@
+using System;
 using Balda.WebApi.Database;
+using Balda.WebApi.Security;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Balda.WebApi
 {
@@ -24,8 +28,12 @@ namespace Balda.WebApi
         // Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<JwtTokenConfiguration>(Configuration.GetSection(JwtTokenConfiguration.Section));
+            services.TryAddSingleton<JwtTokenGenerator>();
+
             ConfigureDatabase(services);
             ConfigureIdentity(services);
+            ConfigureAuthentication(services);
             
             services.AddControllers();
         }
@@ -43,8 +51,32 @@ namespace Balda.WebApi
             
             var builder = services.AddIdentityCore<BaldaUser>();
             var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
-            identityBuilder.AddEntityFrameworkStores<BaldaUserDbContext>();
-            identityBuilder.AddSignInManager<SignInManager<BaldaUser>>();
+            identityBuilder
+                .AddRoles<IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<BaldaUserDbContext>();
+        }
+
+        private void ConfigureAuthentication(IServiceCollection services)
+        {
+            var jwt = Configuration.GetSection(JwtTokenConfiguration.Section)
+                .Get<JwtTokenConfiguration>();
+            
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // TODO: require on prod
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwt.Issuer,
+                        ValidAudience = jwt.Audience,
+                        IssuerSigningKey = SecurityKeyGenerator.Generate(jwt.PrivateKey)
+                    };
+                });
         }
 
         // This method gets called by the runtime.
