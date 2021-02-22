@@ -15,8 +15,7 @@ namespace Balda.WebApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
                 {
-                    logging.ClearProviders();
-                    logging.AddConsole();
+                    logging.ClearProviders().AddConsole();
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }
