@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Balda.WebApi.Controllers
 {
-    [Authorize]
     [ApiController]
     public sealed class RegistrationController : ControllerBase
     {
@@ -24,8 +23,7 @@ namespace Balda.WebApi.Controllers
             _userManager = userManager;
             _logger = logger;
         }
-        
-        [AllowAnonymous]
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequest request)
         {

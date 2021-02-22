@@ -15,7 +15,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Balda.WebApi.Controllers
 {
-    [Authorize]
     [ApiController]
     public sealed class AuthController : ControllerBase
     {
@@ -33,7 +32,6 @@ namespace Balda.WebApi.Controllers
             _logger = logger;
         }
 
-        [AllowAnonymous]
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
         {
