@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Balda.WebApi", "Balda.WebApi\Balda.WebApi.csproj", "{0B2FF798-5119-477D-8479-6160F4E81509}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Balda.Tests", "Balda.Tests\Balda.Tests.csproj", "{D4BA7E39-22C8-4554-8A66-98B8B8CE0918}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{0B2FF798-5119-477D-8479-6160F4E81509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B2FF798-5119-477D-8479-6160F4E81509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B2FF798-5119-477D-8479-6160F4E81509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4BA7E39-22C8-4554-8A66-98B8B8CE0918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4BA7E39-22C8-4554-8A66-98B8B8CE0918}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4BA7E39-22C8-4554-8A66-98B8B8CE0918}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4BA7E39-22C8-4554-8A66-98B8B8CE0918}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

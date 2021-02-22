@@ -10,3 +10,13 @@ services:
       - ./docker/database/data:/var/lib/postgresql/data
     ports:
       - 5555:5432
+  database_test:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=balda_test
+      - POSTGRES_PASSWORD=balda_test
+      - POSTGRES_DB=balda_test
+    volumes:
+      - ./docker/database/data_test:/var/lib/postgresql/data
+    ports:
+      - 5566:5432

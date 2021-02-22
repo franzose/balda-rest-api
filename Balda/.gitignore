@@ -1,4 +1,5 @@
 /docker/
+*.feature.cs
 
 # User-specific files
 *.suo
