@@ -58,19 +58,34 @@ namespace Balda.Tests.Steps
         [Then(@"I should be authenticated as the ""(.+)"" user")]
         public async Task AssertAuthenticatedAs(string username)
         {
-            var content = await _response.Content.ReadAsStringAsync();
-            var token = JsonSerializer.Deserialize<HttpResponse>(content)?.Token ?? "";
+            var token = await GetJwtTokenFromResponse();
 
-            AssertClaimsForAuthentication(username, token);
+            AssertUserIsAuthenticated(username, token);
             AssertHeadersContainTokenCookie(token);
         }
 
-        private void AssertClaimsForAuthentication(string username, string token)
+        [Then(@"I should not be authenticated")]
+        public async Task AssertNotAuthenticatedAs()
+        {
+            Assert.Empty(await GetJwtTokenFromResponse());
+            AssertHeadersDoNotContainTokenCookie();
+        }
+
+        private async Task<string> GetJwtTokenFromResponse()
+        {
+            var content = await _response.Content.ReadAsStringAsync();
+            
+            return JsonSerializer.Deserialize<HttpResponse>(content)?.Token ?? "";
+        }
+
+        private void AssertUserIsAuthenticated(string username, string token)
         {
             var validationParams = _app.GetService<TokenValidationParameters>();
-            var claims = new JwtSecurityTokenHandler().ValidateToken(token, validationParams, out var securityToken);
-
-            foreach (var claim in claims.Claims)
+            var claims = new JwtSecurityTokenHandler()
+                .ValidateToken(token, validationParams, out var securityToken)
+                .Claims;
+            
+            foreach (var claim in claims)
             {
                 Assert.Equal(username, claim.Subject?.Name ?? "");
                 Assert.True(claim.Subject?.IsAuthenticated);
@@ -81,6 +96,11 @@ namespace Balda.Tests.Steps
         {
             Assert.Contains(_response.Headers, h =>
                 h.Key == "Set-Cookie" && h.Value.First() == $"token={token}; path=/; httponly");
+        }
+
+        private void AssertHeadersDoNotContainTokenCookie()
+        {
+            Assert.DoesNotContain(_response.Headers, h => h.Key == "Set-Cookie");
         }
     }
 }
