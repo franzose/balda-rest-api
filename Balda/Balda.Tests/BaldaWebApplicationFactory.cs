@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Balda.Tests
 {
-    public sealed class BaldaWebApplicationFactory : WebApplicationFactory<TestStartup>
+    public sealed class BaldaWebApplicationFactory : WebApplicationFactory<Startup>
     {
         public T GetService<T>() where T : class
         {
@@ -14,7 +14,7 @@ namespace Balda.Tests
         
         protected override IHostBuilder CreateHostBuilder()
             => Host.CreateDefaultBuilder(System.Array.Empty<string>())
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<TestStartup>(); })
+                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
                 .UseEnvironment("Test");
     }
 }

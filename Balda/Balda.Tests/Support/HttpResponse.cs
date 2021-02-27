@@ -14,5 +14,7 @@ namespace Balda.Tests.Support
         {
             set => Message = value;
         }
+        
+        [JsonPropertyName("token")] public string Token { get; set; }
     }
 }

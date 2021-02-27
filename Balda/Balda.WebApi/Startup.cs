@@ -28,9 +28,6 @@ namespace Balda.WebApi
         // Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JwtTokenConfiguration>(Configuration.GetSection(JwtTokenConfiguration.Section));
-            services.TryAddSingleton<JwtTokenGenerator>();
-
             ConfigureDatabase(services);
             ConfigureIdentity(services);
             ConfigureAuthentication(services);
@@ -58,24 +55,31 @@ namespace Balda.WebApi
 
         private void ConfigureAuthentication(IServiceCollection services)
         {
+            services.Configure<JwtTokenConfiguration>(Configuration.GetSection(JwtTokenConfiguration.Section));
+            services.TryAddSingleton<JwtTokenGenerator>();
+            
             var jwt = Configuration.GetSection(JwtTokenConfiguration.Section)
                 .Get<JwtTokenConfiguration>();
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwt.Issuer,
+                ValidAudience = jwt.Audience,
+                IssuerSigningKey = SecurityKeyGenerator.Generate(jwt.PrivateKey)
+            };
             
+            services.TryAddSingleton(tokenValidationParameters);
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     // TODO: require on prod
                     options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwt.Issuer,
-                        ValidAudience = jwt.Audience,
-                        IssuerSigningKey = SecurityKeyGenerator.Generate(jwt.PrivateKey)
-                    };
+                    options.TokenValidationParameters = tokenValidationParameters;
                 });
         }
 
