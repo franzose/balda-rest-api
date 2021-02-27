@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Balda.WebApi.Controllers.Model;
 using Balda.WebApi.Database;
 using Balda.WebApi.Security;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -41,21 +40,20 @@ namespace Balda.WebApi.Controllers
 
                 if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                     return Problem("No user was found for the given credentials", "", 401, "User not found");
-                
+
                 var token = await CreateJwtToken(user);
-                    
+
                 HttpContext.Response.Cookies.Append("token", token, new CookieOptions
                 {
                     HttpOnly = true
                 });
-                    
-                return Ok(new {token});
 
+                return Ok(new {token});
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message, e);
-                
+
                 return Problem("Your request could not be processed", "", 500, "Something went wrong");
             }
         }
