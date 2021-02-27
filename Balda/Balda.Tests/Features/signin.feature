@@ -4,7 +4,7 @@ Feature: Sign in
   I should be able to sign in
 
   Scenario: Successful sign in
-    Given There are some registered users
+    Given there are some registered users
       | username | password             |
       | user1    | kRk9mopFE@pzR]4WtujY |
       | user2    | W2W3FBnfXkw*&wjwqbaw |

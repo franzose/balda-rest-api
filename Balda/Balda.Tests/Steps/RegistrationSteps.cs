@@ -16,7 +16,7 @@ namespace Balda.Tests.Steps
         public RegistrationSteps(BaldaWebApplicationFactory app)
             => _userManager = app.GetService<UserManager<BaldaUser>>();
 
-        [Given("There are some registered users")]
+        [Given("there are some registered users")]
         public async Task ThereAreRegisteredUsers(Table table)
         {
             foreach (var credentials in table.CreateSet<UserCredentials>())

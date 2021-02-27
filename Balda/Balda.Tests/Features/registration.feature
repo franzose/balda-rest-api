@@ -25,7 +25,7 @@ Feature: Registration
       | foo      |                      |
 
   Scenario: Trying to register with an already taken username
-    Given There are some registered users
+    Given there are some registered users
       | username | password             |
       | foo      | kRk9mopFE@pzR]4WtujY |
       | bar      | W2W3FBnfXkw*&wjwqbaw |
