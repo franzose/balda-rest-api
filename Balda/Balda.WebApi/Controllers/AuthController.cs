@@ -7,6 +7,7 @@ using Balda.WebApi.Controllers.Model;
 using Balda.WebApi.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -60,6 +61,24 @@ namespace Balda.WebApi.Controllers
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+        }
+
+        [Authorize]
+        [HttpPost("signout")]
+        public async Task<IActionResult> SignOutAction()
+        {
+            try
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                return RedirectToAction("SignIn");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+
+                return Problem("Could not sign out", "", 500, "Something went wrong");
+            }
         }
     }
 }

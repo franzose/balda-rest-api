@@ -43,3 +43,16 @@ Feature: Sign in
       | username | password             |
       |          | kRk9mopFE@pzR]4WtujY |
       | user1    |                      |
+
+  Scenario: Successful sign out
+    Given there are some registered users
+      | username | password             |
+      | user1    | kRk9mopFE@pzR]4WtujY |
+      | user2    | W2W3FBnfXkw*&wjwqbaw |
+    And I send POST request to "/signin" with
+      """
+      {"username": "user1", "password": "kRk9mopFE@pzR]4WtujY"}
+      """
+    Then I should be authenticated
+    When I send POST request to "/signout"
+    Then I should not be authenticated

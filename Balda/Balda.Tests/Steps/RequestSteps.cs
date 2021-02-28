@@ -28,6 +28,7 @@ namespace Balda.Tests.Steps
             _client = app.CreateDefaultClient();
         }
 
+        [Given(@"I send (GET|POST|PUT|PATCH|DELETE) request to ""(.+)"" with")]
         [When(@"I send (GET|POST|PUT|PATCH|DELETE) request to ""(.+)"" with")]
         public async Task SendRequest(string method, string endpoint, string json)
         {
@@ -40,7 +41,19 @@ namespace Balda.Tests.Steps
             
             _response = await _client.SendAsync(_request);
         }
-        
+
+        [When(@"I send (GET|POST|PUT|PATCH|DELETE) request to ""(.+)""")]
+        public async Task SendSimpleRequest(string method, string endpoint)
+        {
+            _request = new HttpRequestMessage
+            {
+                Method = new HttpMethod(method),
+                RequestUri = new Uri(endpoint, UriKind.Relative)
+            };
+            
+            _response = await _client.SendAsync(_request);
+        }
+
         [Then(@"I should see (\d+) status code")]
         public void AssertResponseStatusCode(int code)
             => Assert.Equal((HttpStatusCode) code, _response.StatusCode);
