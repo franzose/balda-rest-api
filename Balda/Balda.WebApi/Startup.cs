@@ -1,17 +1,16 @@
 using System;
 using Balda.WebApi.Database;
-using Balda.WebApi.Security;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Balda.WebApi
 {
@@ -55,31 +54,15 @@ namespace Balda.WebApi
 
         private void ConfigureAuthentication(IServiceCollection services)
         {
-            services.Configure<JwtTokenConfiguration>(Configuration.GetSection(JwtTokenConfiguration.Section));
-            services.TryAddSingleton<JwtTokenGenerator>();
-            
-            var jwt = Configuration.GetSection(JwtTokenConfiguration.Section)
-                .Get<JwtTokenConfiguration>();
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwt.Issuer,
-                ValidAudience = jwt.Audience,
-                IssuerSigningKey = SecurityKeyGenerator.Generate(jwt.PrivateKey)
-            };
-            
-            services.TryAddSingleton(tokenValidationParameters);
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
                 {
-                    // TODO: require on prod
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = tokenValidationParameters;
+                    options.LoginPath = "/signin";
+                    options.LogoutPath = "/signout";
+                    options.AccessDeniedPath = "/forbidden";
+                    options.Cookie.Name = "balda_auth";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Strict;
                 });
         }
 
@@ -98,7 +81,7 @@ namespace Balda.WebApi
             }
             
             app.UseRouting();
-
+            
             app.UseAuthentication();
             app.UseAuthorization();
 

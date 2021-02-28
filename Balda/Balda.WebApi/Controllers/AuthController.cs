@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Balda.WebApi.Controllers.Model;
 using Balda.WebApi.Database;
-using Balda.WebApi.Security;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,16 +17,13 @@ namespace Balda.WebApi.Controllers
     public sealed class AuthController : ControllerBase
     {
         private readonly UserManager<BaldaUser> _userManager;
-        private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             UserManager<BaldaUser> userManager,
-            JwtTokenGenerator jwtTokenGenerator,
             ILogger<AuthController> logger)
         {
             _userManager = userManager;
-            _jwtTokenGenerator = jwtTokenGenerator;
             _logger = logger;
         }
 
@@ -41,14 +37,12 @@ namespace Balda.WebApi.Controllers
                 if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                     return Problem("No user was found for the given credentials", "", 401, "User not found");
 
-                var token = await CreateJwtToken(user);
+                var principal = await CreateClaimsPrincipal(user);
+                var props = new AuthenticationProperties { AllowRefresh = true };
 
-                HttpContext.Response.Cookies.Append("token", token, new CookieOptions
-                {
-                    HttpOnly = true
-                });
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, props);
 
-                return Ok(new {token});
+                return Ok();
             }
             catch (Exception e)
             {
@@ -58,23 +52,14 @@ namespace Balda.WebApi.Controllers
             }
         }
 
-        private async Task<string> CreateJwtToken(BaldaUser user)
+        private async Task<ClaimsPrincipal> CreateClaimsPrincipal(BaldaUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            
-            var claims = new List<Claim> {new(ClaimsIdentity.DefaultNameClaimType, user.UserName)};
-            
-            claims.AddRange(roles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
+            var claims = new List<Claim>{new (ClaimTypes.Name, user.UserName)};
 
-            var claimsIdentity = new ClaimsIdentity(
-                claims,
-                "Token",
-                ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            var token = _jwtTokenGenerator.Generate(claimsIdentity);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }
     }
 }

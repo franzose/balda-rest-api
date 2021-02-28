@@ -1,13 +1,11 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Balda.Tests.Support;
-using Microsoft.IdentityModel.Tokens;
+using Balda.WebApi.Database;
+using Microsoft.AspNetCore.Identity;
 using TechTalk.SpecFlow;
 using Xunit;
 using Xunit.Abstractions;
@@ -55,52 +53,13 @@ namespace Balda.Tests.Steps
             Assert.Contains(message, content);
         }
 
-        [Then(@"I should be authenticated as the ""(.+)"" user")]
-        public async Task AssertAuthenticatedAs(string username)
-        {
-            var token = await GetJwtTokenFromResponse();
-
-            AssertUserIsAuthenticated(username, token);
-            AssertHeadersContainTokenCookie(token);
-        }
+        [Then(@"I should be authenticated")]
+        public void AssertAuthenticated()
+            => Assert.Contains(_response.Headers, h =>
+                h.Key == "Set-Cookie" && h.Value.FirstOrDefault(v => v.StartsWith("balda_auth")) != null);
 
         [Then(@"I should not be authenticated")]
-        public async Task AssertNotAuthenticatedAs()
-        {
-            Assert.Empty(await GetJwtTokenFromResponse());
-            AssertHeadersDoNotContainTokenCookie();
-        }
-
-        private async Task<string> GetJwtTokenFromResponse()
-        {
-            var content = await _response.Content.ReadAsStringAsync();
-            
-            return JsonSerializer.Deserialize<HttpResponse>(content)?.Token ?? "";
-        }
-
-        private void AssertUserIsAuthenticated(string username, string token)
-        {
-            var validationParams = _app.GetService<TokenValidationParameters>();
-            var claims = new JwtSecurityTokenHandler()
-                .ValidateToken(token, validationParams, out var securityToken)
-                .Claims;
-            
-            foreach (var claim in claims)
-            {
-                Assert.Equal(username, claim.Subject?.Name ?? "");
-                Assert.True(claim.Subject?.IsAuthenticated);
-            }
-        }
-
-        private void AssertHeadersContainTokenCookie(string token)
-        {
-            Assert.Contains(_response.Headers, h =>
-                h.Key == "Set-Cookie" && h.Value.First() == $"token={token}; path=/; httponly");
-        }
-
-        private void AssertHeadersDoNotContainTokenCookie()
-        {
-            Assert.DoesNotContain(_response.Headers, h => h.Key == "Set-Cookie");
-        }
+        public void AssertNotAuthenticated()
+            => Assert.DoesNotContain(_response.Headers, h => h.Key == "Set-Cookie");
     }
 }

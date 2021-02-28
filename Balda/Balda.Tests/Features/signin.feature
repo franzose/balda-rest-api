@@ -13,7 +13,7 @@ Feature: Sign in
     {"username": "user1", "password": "kRk9mopFE@pzR]4WtujY"}
     """
     Then I should see 200 status code
-    And I should be authenticated as the "user1" user
+    And I should be authenticated
 
   Scenario: Invalid credentials
     Given there are some registered users
