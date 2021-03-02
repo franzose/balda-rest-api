@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +18,7 @@ namespace Balda.WebApi
                 {
                     logging.ClearProviders().AddConsole();
                 })
+                .ConfigureAppConfiguration(builder => builder.AddJsonFile("words.json"))
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }
 }

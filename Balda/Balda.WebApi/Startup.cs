@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Balda.WebApi.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,6 +33,9 @@ namespace Balda.WebApi
             ConfigureAuthentication(services);
             
             services.AddControllers();
+
+            services.Configure<WordDictionary>(c =>
+                c.Words = Configuration.GetSection(WordDictionary.SectionName).Get<List<string>>());
         }
 
         private void ConfigureDatabase(IServiceCollection services)
